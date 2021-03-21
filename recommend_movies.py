@@ -6,24 +6,14 @@ import math
 import numpy as np
 
 
-df_3 = spark.read.csv("/home/matteus-paula/projetos/ml-latest-small/ratings.csv", header=True, inferSchema=True)
-df_3 = df_3.select(["userId", "movieId", "rating"])
+jaccard_distance = spark.read.csv("/home/your_path/ratings.csv", header=True, inferSchema=True)
+jaccard_distance = jaccard_distance.select(["movieId", "userId"]).withColumn("rating", lit(1.0))
+
+cosine_similarity_ratings = spark.read.csv("/home/your_path/ratings.csv", header=True, inferSchema=True)
+cosine_similarity_ratings = cosine_similarity_ratings.select(["movieId", "userId", "rating"])
 
 
-df_3 = spark.read.csv("/home/matteus-paula/projetos/ml-latest-small/sites.csv", header=True, inferSchema=True)
-df_3 = df_3.select(["site_id", "userId"]).withColumn("rating", lit(1.0))
-
-
-ratings = spark.read.csv("/home/matteus-paula/projetos/ml-latest-small/ml-latest/ratings.csv", header=True, inferSchema=True)
-df_3 = ratings.select(["movieId", "userId"]).withColumn("rating", lit(1.0))
-
-ratings = spark.read.csv("/home/matteus-paula/projetos/ml-latest-small/ml-latest/ratings.csv", header=True, inferSchema=True)
-df_3 = ratings.select(["movieId", "userId", "rating"])
-
-
-cmat_3 = CoordinateMatrix(df_3.rdd.map(tuple))
-# g = cmat_3.toRowMatrix()
-# g.rows.map(tuple).collect()[0]
+cmat_3 = CoordinateMatrix(cosine_similarity_ratings.rdd.map(tuple))
 
 i_3 = cmat_3.toIndexedRowMatrix()
 i_df_3 = i_3.rows.toDF(["id", "features"])
